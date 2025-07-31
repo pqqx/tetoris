@@ -7,20 +7,22 @@
 <style>
   body {
     font-family: monospace;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     background: #111;
     color: #eee;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
     user-select: none;
   }
   #game {
-    position: relative;
+    position: absolute;
+    top: 20px;
+    left: 20px;
     width: 200px;
     height: 400px;
     background: #222;
     border: 3px solid #555;
-    margin-top: 20px;
   }
   .cell {
     width: 20px;
@@ -30,12 +32,14 @@
     float: left;
   }
   #controller {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
     display: grid;
     grid-template-columns: 60px 60px 60px;
     grid-template-rows: 40px 40px;
-    gap: 5px;
+    gap: 10px;
     justify-content: center;
-    margin-top: 20px;
   }
   #upBtn {
     grid-column: 2;
@@ -54,23 +58,61 @@
     grid-row: 2;
   }
   button {
-    padding: 5px;
-    font-size: 14px;
-    width: 100%;
-    height: 100%;
+    padding: 0;
+    font-size: 18px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: #444;
+    color: #eee;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
   }
-  #status {
-    margin-top: 10px;
-    min-height: 20px;
+  button:hover {
+    background: #666;
+  }
+  #undoReset {
+    position: absolute;
+    bottom: 90px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #undoReset button {
+    width: 130px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 14px;
   }
   #saveLoad {
-    margin-top: 20px;
+    position: absolute;
+    bottom: 20px;
+    left: 220px;
+    display: flex;
+    gap: 10px;
+  }
+  #saveLoad button {
+    width: 80px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  #status {
+    position: absolute;
+    top: 430px;
+    left: 20px;
+    min-height: 20px;
+    font-size: 14px;
   }
 </style>
 </head>
 <body>
 
-<h1>テトリスミニ</h1>
+<h1 style="position:absolute; top:0; left:20px; margin:0; font-size:20px;">テトリスミニ</h1>
 <div id="game"></div>
 
 <div id="controller">
@@ -80,7 +122,7 @@
   <button id="rightBtn">→</button>
 </div>
 
-<div>
+<div id="undoReset">
   <button id="undoBtn">一手戻る</button>
   <button id="resetUndoBtn">すべて戻る</button>
 </div>
@@ -96,7 +138,6 @@
 (() => {
   const COLS = 10;
   const ROWS = 20;
-  const CELL_SIZE = 20;
 
   const gameEl = document.getElementById('game');
   const statusEl = document.getElementById('status');
