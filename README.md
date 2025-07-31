@@ -1,3 +1,2 @@
-# tetoris
+# tetoris (trash)
 github pages tetoris
-trash
