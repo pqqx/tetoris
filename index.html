@@ -3,351 +3,364 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-<title>By Gemini Tetris</title>
+<title>By Gemini Tetoris</title>
 <style>
   :root {
-    --bg-color: #0b0e14;
-    --panel-bg: rgba(20, 26, 38, 0.85);
-    --panel-border: #1f2a3d;
-    --accent-cyan: #00f0f0;
-    --accent-glow: rgba(0, 240, 240, 0.35);
-    --text-color: #e2e8f0;
-    --text-dim: #718096;
-    --grid-border: rgba(255, 255, 255, 0.04);
+    --bg-main: #0a0d14;
+    --panel-bg: rgba(16, 22, 34, 0.9);
+    --border-color: #2a3b55;
+    --cyan: #00f0f0;
+    --yellow: #f0f000;
+    --purple: #a000f0;
+    --green: #00f000;
+    --red: #f00000;
+    --blue: #0000f0;
+    --orange: #f0a000;
+    --gold: #fbbf24;
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
   }
 
   * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
     user-select: none;
     -webkit-user-select: none;
   }
 
   body {
-    margin: 0;
-    padding: 10px;
-    background-color: var(--bg-color);
+    background-color: var(--bg-main);
     background-image: 
-      radial-gradient(circle at 50% 20%, rgba(0, 240, 240, 0.08) 0%, transparent 60%),
-      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 100% 100%, 20px 20px, 20px 20px;
-    color: var(--text-color);
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, "Yu Gothic", sans-serif;
+      radial-gradient(circle at 50% 30%, rgba(0, 240, 240, 0.08) 0%, transparent 65%),
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 24px 24px, 24px 24px;
+    color: var(--text-main);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow-x: hidden;
+    padding: 10px;
   }
 
-  .game-wrapper {
+  .game-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    max-width: 600px;
+    gap: 10px;
+    max-width: 650px;
     width: 100%;
   }
 
-  header {
-    text-align: center;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 26px;
-    letter-spacing: 4px;
-    font-weight: 800;
+  header h1 {
+    font-size: 24px;
+    letter-spacing: 5px;
+    font-weight: 900;
     color: #fff;
-    text-shadow: 0 0 10px var(--accent-cyan), 0 0 20px var(--accent-cyan);
+    text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
   }
 
-  .main-stage {
+  .stage-layout {
     display: flex;
     justify-content: center;
-    gap: 16px;
-    width: 100%;
     align-items: flex-start;
+    gap: 12px;
+    width: 100%;
   }
 
-  /* サイドパネル */
-  .side-panel {
+  /* サイドパネル共通 */
+  .panel-column {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    width: 110px;
+    gap: 10px;
+    width: 100px;
   }
 
-  .panel-box {
+  .card {
     background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
+    border: 1.5px solid var(--border-color);
     border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    backdrop-filter: blur(4px);
+    padding: 8px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
     text-align: center;
   }
 
-  .panel-title {
-    font-size: 11px;
-    font-weight: 700;
+  .card-title {
+    font-size: 10px;
+    font-weight: 800;
     letter-spacing: 1.5px;
     color: var(--text-dim);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
 
-  .stat-value {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--accent-cyan);
-    font-family: monospace;
+  .stat-val {
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--cyan);
+    font-family: 'Courier New', monospace;
   }
 
-  #next-canvas {
+  .b2b-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 900;
+    background: linear-gradient(45deg, #f59e0b, #ef4444);
+    color: #fff;
+    padding: 2px 4px;
+    border-radius: 3px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.2s ease;
+  }
+  .b2b-badge.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* キャンバス群 */
+  canvas {
     display: block;
     margin: 0 auto;
+  }
+
+  #hold-canvas, #next-canvas {
     background: rgba(0, 0, 0, 0.4);
     border-radius: 4px;
   }
 
-  /* ゲーム盤面 */
-  .board-container {
+  .board-wrapper {
     position: relative;
-    background: rgba(5, 7, 12, 0.9);
-    border: 2px solid var(--panel-border);
-    border-radius: 10px;
-    padding: 4px;
-    box-shadow: 0 0 25px rgba(0,0,0,0.8), 0 0 15px var(--accent-glow);
+    background: rgba(4, 6, 12, 0.95);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 3px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.9), 0 0 15px rgba(0, 240, 240, 0.2);
   }
 
-  #game-canvas {
-    display: block;
-    background: #0d1117;
-    border-radius: 6px;
-  }
-
-  /* オーバーレイ (GAME OVER / PAUSE) */
-  .overlay {
+  /* ゲーム内ポップアップテキスト（T-Spin, PC, Tetris等） */
+  .popup-banner {
     position: absolute;
-    inset: 4px;
-    background: rgba(5, 8, 15, 0.85);
-    backdrop-filter: blur(5px);
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    font-size: 18px;
+    font-weight: 900;
+    color: #fbbf24;
+    text-shadow: 0 0 10px #f59e0b, 0 0 20px #000;
+    pointer-events: none;
+    opacity: 0;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 10;
+  }
+  .popup-banner.pop {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  /* オーバーレイ (Game Over / Pause) */
+  .overlay-screen {
+    position: absolute;
+    inset: 3px;
+    background: rgba(8, 12, 22, 0.88);
+    backdrop-filter: blur(4px);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     border-radius: 6px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
+    z-index: 20;
   }
-
-  .overlay.active {
+  .overlay-screen.active {
     opacity: 1;
     pointer-events: auto;
   }
-
   .overlay-title {
     font-size: 24px;
     font-weight: 900;
-    letter-spacing: 2px;
-    color: #ff3366;
-    text-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
+    color: #ef4444;
+    text-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
   }
 
-  /* 操作ガイド */
-  .guide-box {
+  /* UIボタン */
+  .btn {
+    background: #1e293b;
+    color: var(--text-main);
+    border: 1px solid #334155;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.08s ease;
+    outline: none;
+  }
+  .btn:hover { background: #334155; border-color: #475569; }
+  .btn:active, .btn.btn-active {
+    transform: scale(0.92);
+    background: var(--cyan) !important;
+    color: #000 !important;
+    box-shadow: 0 0 12px var(--cyan);
+  }
+
+  .menu-btn {
+    width: 100%;
+    padding: 6px 0;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .key-guide {
+    font-size: 10px;
+    line-height: 1.6;
+    text-align: left;
     display: none;
   }
-  @media (min-width: 600px) {
-    .side-panel.right-panel {
-      width: 130px;
-    }
-    .guide-box {
-      display: block;
-      font-size: 11px;
-      line-height: 1.6;
-      text-align: left;
-    }
+  @media (min-width: 620px) {
+    .panel-column.right-col { width: 120px; }
+    .key-guide { display: block; }
     kbd {
-      background: #2d3748;
+      background: #334155;
+      padding: 1px 3px;
       border-radius: 3px;
-      padding: 1px 4px;
-      font-family: monospace;
-      border: 1px solid #4a5568;
+      font-size: 9px;
       color: #fff;
     }
   }
 
-  /* ボタン全般 */
-  .btn {
-    background: #1e2638;
-    color: var(--text-color);
-    border: 1px solid #334155;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.08s ease;
-    outline: none;
-  }
-
-  .btn:hover {
-    background: #2a364f;
-    border-color: #475569;
-  }
-
-  .btn:active, .btn.key-pressed {
-    transform: scale(0.92);
-    background: var(--accent-cyan) !important;
-    color: #000 !important;
-    box-shadow: 0 0 15px var(--accent-cyan);
-  }
-
-  .action-btn {
-    width: 100%;
-    padding: 7px 0;
-    font-size: 12px;
-    margin-top: 6px;
-  }
-
-  /* コントローラー (モバイル ＆ キーボード連動) */
-  .controls-wrapper {
+  /* バーチャルコントローラー */
+  .v-controller {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    max-width: 380px;
-    padding: 6px 12px;
-    gap: 15px;
-  }
-
-  .dpad {
-    display: grid;
-    grid-template-columns: repeat(3, 46px);
-    grid-template-rows: repeat(2, 46px);
-    gap: 6px;
-  }
-
-  .dpad .pad-btn {
-    width: 46px;
-    height: 46px;
-    font-size: 18px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  #btn-up { grid-column: 2; grid-row: 1; }
-  #btn-left { grid-column: 1; grid-row: 2; }
-  #btn-down { grid-column: 2; grid-row: 2; }
-  #btn-right { grid-column: 3; grid-row: 2; }
-
-  .action-pad {
-    display: flex;
+    max-width: 440px;
+    padding: 4px 10px;
     gap: 8px;
   }
 
-  .drop-btn {
-    width: 75px;
-    height: 98px;
-    font-size: 14px;
-    border-radius: 12px;
-    background: #251b38;
-    border-color: #553c7b;
-    color: #d8b4fe;
+  .dpad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(2, 44px);
+    gap: 5px;
   }
-
-  .drop-btn:active, .drop-btn.key-pressed {
-    background: #a855f7 !important;
-    box-shadow: 0 0 15px #a855f7;
+  .dpad-grid .pad-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+  #v-rot-r { grid-column: 2; grid-row: 1; }
+  #v-left  { grid-column: 1; grid-row: 2; }
+  #v-down  { grid-column: 2; grid-row: 2; }
+  #v-right { grid-column: 3; grid-row: 2; }
 
-  #status-bar {
+  .action-col {
+    display: flex;
+    gap: 6px;
+  }
+  .act-btn {
+    height: 93px;
+    width: 52px;
     font-size: 12px;
-    color: var(--text-dim);
-    min-height: 16px;
-    text-align: center;
+    border-radius: 10px;
+    line-height: 1.3;
   }
+  .hold-btn { background: #162a3f; border-color: #2b5175; color: #38bdf8; }
+  .drop-btn { background: #2f173b; border-color: #632a82; color: #e879f9; }
 </style>
 </head>
 <body>
 
-<div class="game-wrapper">
+<div class="game-container">
   <header>
-    <h1>TETRIS</h1>
+    <h1>TETRIS GUIDELINE</h1>
   </header>
 
-  <div class="main-stage">
-    <!-- 左パネル: STATS & NEXT -->
-    <div class="side-panel">
-      <div class="panel-box">
-        <div class="panel-title">NEXT</div>
-        <canvas id="next-canvas" width="80" height="80"></canvas>
+  <div class="stage-layout">
+    <!-- 左パネル: HOLD ＆ STATS -->
+    <div class="panel-column">
+      <div class="card">
+        <div class="card-title">HOLD</div>
+        <canvas id="hold-canvas" width="72" height="60"></canvas>
       </div>
-
-      <div class="panel-box">
-        <div class="panel-title">SCORE</div>
-        <div id="score" class="stat-value">0</div>
+      <div class="card">
+        <div class="card-title">SCORE</div>
+        <div id="val-score" class="stat-val">0</div>
+        <div id="b2b-indicator" class="b2b-badge">B2B ×1.5</div>
       </div>
-
-      <div class="panel-box">
-        <div class="panel-title">LEVEL</div>
-        <div id="level" class="stat-value">1</div>
+      <div class="card">
+        <div class="card-title">LEVEL</div>
+        <div id="val-level" class="stat-val">1</div>
       </div>
-
-      <div class="panel-box">
-        <div class="panel-title">LINES</div>
-        <div id="lines" class="stat-value">0</div>
+      <div class="card">
+        <div class="card-title">LINES</div>
+        <div id="val-lines" class="stat-val">0</div>
+      </div>
+      <div class="card">
+        <div class="card-title">COMBO</div>
+        <div id="val-combo" class="stat-val">-</div>
       </div>
     </div>
 
-    <!-- メイン盤面 -->
-    <div class="board-container">
-      <canvas id="game-canvas" width="200" height="400"></canvas>
+    <!-- メインステージ -->
+    <div class="board-wrapper">
+      <canvas id="board-canvas" width="200" height="400"></canvas>
       
-      <!-- オーバーレイ (GAME OVER / PAUSE) -->
-      <div id="overlay" class="overlay">
-        <div id="overlay-title" class="overlay-title">GAME OVER</div>
-        <button id="retry-btn" class="btn" style="padding: 8px 20px; font-size: 14px;">RETRY</button>
+      <div id="popup-text" class="popup-banner">T-SPIN DOUBLE!</div>
+
+      <div id="overlay-screen" class="overlay-screen">
+        <div id="overlay-msg" class="overlay-title">GAME OVER</div>
+        <button id="btn-retry" class="btn" style="padding: 6px 18px; font-size: 13px;">RETRY</button>
       </div>
     </div>
 
-    <!-- 右パネル: システム操作 ＆ ガイド -->
-    <div class="side-panel right-panel">
-      <div class="panel-box">
-        <div class="panel-title">MENU</div>
-        <button id="btn-pause" class="btn action-btn">ポーズ (P)</button>
-        <button id="btn-undo" class="btn action-btn" style="color:#67e8f9;">1手戻る (Z)</button>
-        <button id="btn-restart" class="btn action-btn" style="color:#fda4af;">リセット (R)</button>
+    <!-- 右パネル: NEXT ＆ MENU -->
+    <div class="panel-column right-col">
+      <div class="card">
+        <div class="card-title">NEXT</div>
+        <canvas id="next-canvas" width="72" height="200"></canvas>
       </div>
-
-      <div class="panel-box guide-box">
-        <div class="panel-title">KEY GUIDE</div>
-        <kbd>←</kbd> <kbd>→</kbd> : 移動<br>
-        <kbd>↑</kbd> <kbd>X</kbd> : 回転<br>
-        <kbd>↓</kbd> : 高速落下<br>
-        <kbd>Space</kbd> : 瞬時落下<br>
-        <kbd>Z</kbd> : 1手戻る<br>
-        <kbd>P</kbd> : 一時停止
+      <div class="card">
+        <div class="card-title">SYSTEM</div>
+        <button id="btn-pause" class="btn menu-btn">PAUSE (P)</button>
+        <button id="btn-restart" class="btn menu-btn" style="color:#f87171;">RETRY (R)</button>
+      </div>
+      <div class="card key-guide">
+        <div class="card-title">KEYBOARD</div>
+        <kbd>←</kbd><kbd>→</kbd> 移動 (DAS)<br>
+        <kbd>↑</kbd>/<kbd>X</kbd> 右回転<br>
+        <kbd>Z</kbd> 左回転<br>
+        <kbd>C</kbd>/<kbd>Shift</kbd> HOLD<br>
+        <kbd>Space</kbd> HARD DROP<br>
+        <kbd>↓</kbd> SOFT DROP
       </div>
     </div>
   </div>
 
-  <div id="status-bar">READY</div>
+  <!-- バーチャルコントローラー（キー入力連動で点滅） -->
+  <div class="v-controller">
+    <button id="v-hold" class="btn act-btn hold-btn">HOLD<br>(C)</button>
 
-  <!-- コントローラー（キーボード押下時に光る連動UI） -->
-  <div class="controls-wrapper">
-    <div class="dpad">
-      <button id="btn-up" class="btn pad-btn" title="回転">↻</button>
-      <button id="btn-left" class="btn pad-btn">←</button>
-      <button id="btn-down" class="btn pad-btn">↓</button>
-      <button id="btn-right" class="btn pad-btn">→</button>
+    <div class="dpad-grid">
+      <button id="v-rot-r" class="btn pad-btn" title="右回転">↻</button>
+      <button id="v-left" class="btn pad-btn">←</button>
+      <button id="v-down" class="btn pad-btn">↓</button>
+      <button id="v-right" class="btn pad-btn">→</button>
     </div>
-    <div class="action-pad">
-      <button id="btn-drop" class="btn drop-btn">HARD<br>DROP</button>
-    </div>
+
+    <button id="v-rot-l" class="btn act-btn" style="width:44px;" title="左回転">↺<br>(Z)</button>
+    <button id="v-drop" class="btn act-btn drop-btn">HARD<br>DROP</button>
   </div>
 </div>
 
@@ -357,81 +370,124 @@
   const ROWS = 20;
   const BLOCK_SIZE = 20;
 
-  const canvas = document.getElementById('game-canvas');
+  const canvas = document.getElementById('board-canvas');
   const ctx = canvas.getContext('2d');
+  const holdCanvas = document.getElementById('hold-canvas');
+  const holdCtx = holdCanvas.getContext('2d');
   const nextCanvas = document.getElementById('next-canvas');
   const nextCtx = nextCanvas.getContext('2d');
 
-  const scoreEl = document.getElementById('score');
-  const levelEl = document.getElementById('level');
-  const linesEl = document.getElementById('lines');
-  const statusEl = document.getElementById('status-bar');
-  const overlay = document.getElementById('overlay');
-  const overlayTitle = document.getElementById('overlay-title');
-  const retryBtn = document.getElementById('retry-btn');
+  const scoreEl = document.getElementById('val-score');
+  const levelEl = document.getElementById('val-level');
+  const linesEl = document.getElementById('val-lines');
+  const comboEl = document.getElementById('val-combo');
+  const b2bBadge = document.getElementById('b2b-indicator');
+  const popupEl = document.getElementById('popup-text');
+  const overlay = document.getElementById('overlay-screen');
+  const overlayTitle = document.getElementById('overlay-msg');
 
-  // テトリス標準カラー＆シェイプ
+  // 公式7種テトロミノ
   const TETROMINOS = [
-    { name: 'I', shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], color: '#00f0f0' },
-    { name: 'J', shape: [[1,0,0],[1,1,1],[0,0,0]], color: '#0055ff' },
-    { name: 'L', shape: [[0,0,1],[1,1,1],[0,0,0]], color: '#ffaa00' },
-    { name: 'O', shape: [[1,1],[1,1]], color: '#f0f000' },
-    { name: 'S', shape: [[0,1,1],[1,1,0],[0,0,0]], color: '#00f000' },
-    { name: 'T', shape: [[0,1,0],[1,1,1],[0,0,0]], color: '#aa00f0' },
-    { name: 'Z', shape: [[1,1,0],[0,1,1],[0,0,0]], color: '#f00000' }
+    { name: 'I', shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], color: '#00f0f0' }, // 0
+    { name: 'J', shape: [[1,0,0],[1,1,1],[0,0,0]], color: '#0033ff' },                   // 1
+    { name: 'L', shape: [[0,0,1],[1,1,1],[0,0,0]], color: '#ff8800' },                   // 2
+    { name: 'O', shape: [[1,1],[1,1]], color: '#f0f000' },                               // 3
+    { name: 'S', shape: [[0,1,1],[1,1,0],[0,0,0]], color: '#00e600' },                   // 4
+    { name: 'T', shape: [[0,1,0],[1,1,1],[0,0,0]], color: '#a855f7' },                   // 5
+    { name: 'Z', shape: [[1,1,0],[0,1,1],[0,0,0]], color: '#ef4444' }                    // 6
   ];
+
+  // 公式SRS (Super Rotation System) キックオフセット (Canvas座標系: -dy is UP, +dy is DOWN)
+  const JLSTZ_KICKS = {
+    '0->1': [[0,0], [-1,0], [-1,-1], [0,2], [-1,2]],
+    '1->0': [[0,0], [1,0], [1,1], [0,-2], [1,-2]],
+    '1->2': [[0,0], [1,0], [1,1], [0,-2], [1,-2]],
+    '2->1': [[0,0], [-1,0], [-1,-1], [0,2], [-1,2]],
+    '2->3': [[0,0], [1,0], [1,-1], [0,2], [1,2]],
+    '3->2': [[0,0], [-1,0], [-1,1], [0,-2], [-1,-2]],
+    '3->0': [[0,0], [-1,0], [-1,1], [0,-2], [-1,-2]],
+    '0->3': [[0,0], [1,0], [1,-1], [0,2], [1,2]]
+  };
+
+  const I_KICKS = {
+    '0->1': [[0,0], [-2,0], [1,0], [-2,1], [1,-2]],
+    '1->0': [[0,0], [2,0], [-1,0], [2,-1], [-1,2]],
+    '1->2': [[0,0], [-1,0], [2,0], [-1,-2], [2,1]],
+    '2->1': [[0,0], [1,0], [-2,0], [1,2], [-2,-1]],
+    '2->3': [[0,0], [2,0], [-1,0], [2,-1], [-1,2]],
+    '3->2': [[0,0], [-2,0], [1,0], [-2,1], [1,-2]],
+    '3->0': [[0,0], [1,0], [-2,0], [1,2], [-2,-1]],
+    '0->3': [[0,0], [-1,0], [2,0], [-1,-2], [2,1]]
+  };
 
   let board = [];
   let bag = [];
+  let nextQueue = [];
+  let holdType = null;
+  let canHold = true;
   let currentPiece = null;
-  let nextPieceType = null;
+
   let score = 0;
   let level = 1;
   let lines = 0;
+  let combo = -1;
+  let b2b = false;
   let isGameOver = false;
   let isPaused = false;
-  let history = [];
 
-  // タイマー管理
   let lastDropTime = 0;
   let dropInterval = 1000;
+  let lockTimer = 0;
+  let lockResets = 0;
+  const MAX_LOCK_RESETS = 15;
+  const LOCK_DELAY = 500;
+
+  // 七種一巡の法則 (7-Bag Random Generator)
+  function replenishBag() {
+    let newBag = [0, 1, 2, 3, 4, 5, 6];
+    for (let i = newBag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newBag[i], newBag[j]] = [newBag[j], newBag[i]];
+    }
+    bag.push(...newBag);
+  }
+
+  function getNextPieceType() {
+    if (bag.length < 7) replenishBag();
+    return bag.shift();
+  }
 
   function initBoard() {
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
   }
 
-  function getFromBag() {
-    if (bag.length === 0) {
-      bag = [0, 1, 2, 3, 4, 5, 6];
-      for (let i = bag.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [bag[i], bag[j]] = [bag[j], bag[i]];
-      }
+  function spawnPiece(type = null) {
+    while (nextQueue.length < 5) {
+      nextQueue.push(getNextPieceType());
     }
-    return bag.pop();
-  }
+    const pieceType = (type !== null) ? type : nextQueue.shift();
+    const proto = TETROMINOS[pieceType];
 
-  function spawnPiece() {
-    if (nextPieceType === null) {
-      nextPieceType = getFromBag();
-    }
-    const type = nextPieceType;
-    nextPieceType = getFromBag();
-
-    const proto = TETROMINOS[type];
     currentPiece = {
-      type: type,
-      shape: proto.shape.map(row => [...row]),
+      type: pieceType,
+      shape: proto.shape.map(r => [...r]),
       color: proto.color,
       x: Math.floor((COLS - proto.shape[0].length) / 2),
-      y: 0
+      y: 0,
+      rotState: 0,
+      lastAction: 'spawn' // T-Spin判定用
     };
+
+    canHold = true;
+    lockTimer = 0;
+    lockResets = 0;
 
     if (isCollide(currentPiece.x, currentPiece.y, currentPiece.shape)) {
       isGameOver = true;
       showOverlay('GAME OVER');
     }
     drawNext();
+    drawHold();
   }
 
   function isCollide(x, y, shape) {
@@ -448,30 +504,45 @@
     return false;
   }
 
-  function rotate(shape) {
+  function rotateMatrix(shape, dir = 1) {
     const H = shape.length;
     const W = shape[0].length;
     let res = [];
-    for (let c = 0; c < W; c++) {
-      let row = [];
-      for (let r = H - 1; r >= 0; r--) {
-        row.push(shape[r][c]);
+    if (dir === 1) { // 右回転 (時計回り)
+      for (let c = 0; c < W; c++) {
+        let row = [];
+        for (let r = H - 1; r >= 0; r--) row.push(shape[r][c]);
+        res.push(row);
       }
-      res.push(row);
+    } else { // 左回転 (反時計回り)
+      for (let c = W - 1; c >= 0; c--) {
+        let row = [];
+        for (let r = 0; r < H; r++) row.push(shape[r][c]);
+        res.push(row);
+      }
     }
     return res;
   }
 
-  // 簡易壁蹴り（Wall Kick）付き回転
-  function tryRotate() {
+  // 公式SRS回転処理
+  function tryRotate(dir = 1) {
     if (!currentPiece || isGameOver || isPaused) return false;
-    const newShape = rotate(currentPiece.shape);
-    const kicks = [0, -1, 1, -2, 2]; // 左右への位置補正
-    for (let dx of kicks) {
-      if (!isCollide(currentPiece.x + dx, currentPiece.y, newShape)) {
-        saveHistory();
+    if (currentPiece.type === 3) return true; // Oミノは回転不要
+
+    const oldState = currentPiece.rotState;
+    const newState = (oldState + dir + 4) % 4;
+    const newShape = rotateMatrix(currentPiece.shape, dir);
+    const kickKey = `${oldState}->${newState}`;
+    const kicks = (currentPiece.type === 0) ? I_KICKS[kickKey] : JLSTZ_KICKS[kickKey];
+
+    for (let [dx, dy] of kicks) {
+      if (!isCollide(currentPiece.x + dx, currentPiece.y + dy, newShape)) {
         currentPiece.x += dx;
+        currentPiece.y += dy;
         currentPiece.shape = newShape;
+        currentPiece.rotState = newState;
+        currentPiece.lastAction = 'rotate';
+        handleLockReset();
         return true;
       }
     }
@@ -481,17 +552,71 @@
   function move(dx, dy) {
     if (!currentPiece || isGameOver || isPaused) return false;
     if (!isCollide(currentPiece.x + dx, currentPiece.y + dy, currentPiece.shape)) {
-      if (dx !== 0) saveHistory();
       currentPiece.x += dx;
       currentPiece.y += dy;
+      currentPiece.lastAction = 'move';
+      if (dx !== 0) handleLockReset();
       return true;
     }
     return false;
   }
 
+  function handleLockReset() {
+    if (isGrounded()) {
+      if (lockResets < MAX_LOCK_RESETS) {
+        lockTimer = performance.now();
+        lockResets++;
+      }
+    }
+  }
+
+  function isGrounded() {
+    if (!currentPiece) return false;
+    return isCollide(currentPiece.x, currentPiece.y + 1, currentPiece.shape);
+  }
+
+  // HOLD機能
+  function hold() {
+    if (!canHold || isGameOver || isPaused || !currentPiece) return;
+    const curType = currentPiece.type;
+    if (holdType === null) {
+      holdType = curType;
+      spawnPiece();
+    } else {
+      const swapType = holdType;
+      holdType = curType;
+      spawnPiece(swapType);
+    }
+    canHold = false;
+    drawHold();
+  }
+
+  // T-Spin判定 (3-Corner Rule)
+  function checkTSpin() {
+    if (!currentPiece || currentPiece.type !== 5 || currentPiece.lastAction !== 'rotate') {
+      return false;
+    }
+    const cx = currentPiece.x + 1;
+    const cy = currentPiece.y + 1;
+    const corners = [
+      [cx - 1, cy - 1],
+      [cx + 1, cy - 1],
+      [cx - 1, cy + 1],
+      [cx + 1, cy + 1]
+    ];
+    let filledCorners = 0;
+    for (let [x, y] of corners) {
+      if (x < 0 || x >= COLS || y >= ROWS || (y >= 0 && board[y][x])) {
+        filledCorners++;
+      }
+    }
+    return filledCorners >= 3;
+  }
+
   function lockPiece() {
-    saveHistory();
+    const isTSpin = checkTSpin();
     const { shape, x, y, color } = currentPiece;
+
     for (let r = 0; r < shape.length; r++) {
       for (let c = 0; c < shape[r].length; c++) {
         if (shape[r][c]) {
@@ -503,85 +628,125 @@
         }
       }
     }
-    clearLines();
+
+    clearLines(isTSpin);
     spawnPiece();
   }
 
-  function clearLines() {
-    let linesCleared = 0;
+  function clearLines(isTSpin) {
+    let cleared = 0;
     for (let r = ROWS - 1; r >= 0; r--) {
-      if (board[r].every(cell => cell !== null)) {
+      if (board[r].every(c => c !== null)) {
         board.splice(r, 1);
         board.unshift(Array(COLS).fill(null));
-        linesCleared++;
-        r++; // 再検査
+        cleared++;
+        r++;
       }
     }
-    if (linesCleared > 0) {
-      const scoreTable = [0, 100, 300, 500, 800];
-      score += (scoreTable[linesCleared] || 1000) * level;
-      lines += linesCleared;
+
+    // 全消し (Perfect Clear) 判定
+    const isPC = board.every(row => row.every(cell => cell === null));
+
+    if (cleared > 0 || isTSpin) {
+      combo++;
+      let baseScore = 0;
+      let title = '';
+      let isSpecial = false;
+
+      if (isTSpin) {
+        isSpecial = true;
+        if (cleared === 0) { title = 'T-SPIN'; baseScore = 100; }
+        else if (cleared === 1) { title = 'T-SPIN SINGLE!'; baseScore = 800; }
+        else if (cleared === 2) { title = 'T-SPIN DOUBLE!!'; baseScore = 1200; }
+        else if (cleared === 3) { title = 'T-SPIN TRIPLE!!!'; baseScore = 1600; }
+      } else {
+        if (cleared === 1) { title = 'SINGLE'; baseScore = 100; }
+        else if (cleared === 2) { title = 'DOUBLE'; baseScore = 300; }
+        else if (cleared === 3) { title = 'TRIPLE'; baseScore = 500; }
+        else if (cleared === 4) { title = 'TETRIS!!!!'; baseScore = 800; isSpecial = true; }
+      }
+
+      // Back-to-Back 適用
+      if (isSpecial) {
+        if (b2b) {
+          baseScore = Math.floor(baseScore * 1.5);
+          title = `B2B ${title}`;
+        }
+        b2b = true;
+      } else if (cleared > 0) {
+        b2b = false;
+      }
+
+      if (combo > 0) {
+        baseScore += 50 * combo * level;
+      }
+
+      if (isPC) {
+        title = 'PERFECT CLEAR!!';
+        baseScore += 2000 * level;
+      }
+
+      score += baseScore * level;
+      lines += cleared;
       level = Math.floor(lines / 10) + 1;
-      dropInterval = Math.max(100, 1000 - (level - 1) * 80);
-      updateStats();
-      statusEl.textContent = `${linesCleared} LINE CLEAR!`;
+      dropInterval = Math.max(80, 1000 - (level - 1) * 85);
+
+      if (title) showPopup(title);
+    } else {
+      combo = -1;
     }
+
+    updateStats();
   }
 
   function hardDrop() {
     if (!currentPiece || isGameOver || isPaused) return;
-    saveHistory();
-    let dropDist = 0;
+    let dist = 0;
     while (!isCollide(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
       currentPiece.y++;
-      dropDist++;
+      dist++;
     }
-    score += dropDist * 2;
-    updateStats();
+    score += dist * 2;
+    currentPiece.lastAction = 'hardDrop';
     lockPiece();
+    updateStats();
   }
 
   function softDrop() {
     if (move(0, 1)) {
       score += 1;
       updateStats();
-    } else {
-      lockPiece();
     }
   }
 
-  // ゴーストブロックのY座標計算
   function getGhostY() {
     if (!currentPiece) return 0;
     let gy = currentPiece.y;
-    while (!isCollide(currentPiece.x, gy + 1, currentPiece.shape)) {
-      gy++;
-    }
+    while (!isCollide(currentPiece.x, gy + 1, currentPiece.shape)) gy++;
     return gy;
   }
 
-  function drawBlock(targetCtx, x, y, color, isGhost = false) {
-    const px = x * BLOCK_SIZE;
-    const py = y * BLOCK_SIZE;
+  function drawBlock(targetCtx, x, y, color, isGhost = false, size = BLOCK_SIZE) {
+    const px = x * size;
+    const py = y * size;
 
     if (isGhost) {
       targetCtx.strokeStyle = color;
       targetCtx.lineWidth = 1.5;
-      targetCtx.strokeRect(px + 1.5, py + 1.5, BLOCK_SIZE - 3, BLOCK_SIZE - 3);
+      targetCtx.strokeRect(px + 1.5, py + 1.5, size - 3, size - 3);
       return;
     }
 
     targetCtx.fillStyle = color;
-    targetCtx.fillRect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+    targetCtx.fillRect(px + 1, py + 1, size - 2, size - 2);
 
-    // 立体感のハイライト
-    targetCtx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-    targetCtx.fillRect(px + 1, py + 1, BLOCK_SIZE - 2, 3);
-    targetCtx.fillRect(px + 1, py + 1, 3, BLOCK_SIZE - 2);
+    targetCtx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    targetCtx.fillRect(px + 1, py + 1, size - 2, 2.5);
+    targetCtx.fillRect(px + 1, py + 1, 2.5, size - 2);
 
-    targetCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    targetCtx.fillRect(px + 1, py + BLOCK_SIZE - 4, BLOCK_SIZE - 2, 3);
-    targetCtx.fillRect(px + BLOCK_SIZE - 4, py + 1, 3, BLOCK_SIZE - 2);
+    targetCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    targetCtx.fillRect(px + 1, py + size - 3.5, size - 2, 2.5);
+    targetCtx.fillRect(px + size - 3.5, py + 1, 2.5, size - 2);
   }
 
   function draw() {
@@ -595,105 +760,76 @@
       }
     }
 
-    // 固定ブロック
+    // 盤面固定ブロック
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-        if (board[r][c]) {
-          drawBlock(ctx, c, r, board[r][c]);
-        }
+        if (board[r][c]) drawBlock(ctx, c, r, board[r][c]);
       }
     }
 
     if (currentPiece) {
-      // ゴーストブロック描画
-      const ghostY = getGhostY();
+      const gy = getGhostY();
       const { shape, x, y, color } = currentPiece;
+
+      // ゴースト
       for (let r = 0; r < shape.length; r++) {
         for (let c = 0; c < shape[r].length; c++) {
-          if (shape[r][c]) {
-            drawBlock(ctx, x + c, ghostY + r, color, true);
-          }
+          if (shape[r][c]) drawBlock(ctx, x + c, gy + r, color, true);
         }
       }
-
-      // 操作中ブロック描画
+      // 操作ブロック
       for (let r = 0; r < shape.length; r++) {
         for (let c = 0; c < shape[r].length; c++) {
-          if (shape[r][c]) {
-            drawBlock(ctx, x + c, y + r, color);
-          }
+          if (shape[r][c]) drawBlock(ctx, x + c, y + r, color);
         }
+      }
+    }
+  }
+
+  function drawHold() {
+    holdCtx.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
+    if (holdType === null) return;
+    const proto = TETROMINOS[holdType];
+    const s = 14;
+    const ox = (holdCanvas.width - proto.shape[0].length * s) / 2 / s;
+    const oy = (holdCanvas.height - proto.shape.length * s) / 2 / s;
+    const c = canHold ? proto.color : '#555';
+    for (let r = 0; r < proto.shape.length; r++) {
+      for (let cl = 0; cl < proto.shape[r].length; cl++) {
+        if (proto.shape[r][cl]) drawBlock(holdCtx, ox + cl, oy + r, c, false, s);
       }
     }
   }
 
   function drawNext() {
     nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-    if (nextPieceType === null) return;
-    const proto = TETROMINOS[nextPieceType];
-    const shape = proto.shape;
-    const size = shape.length;
-    const offsetX = (4 - shape[0].length) / 2;
-    const offsetY = (4 - size) / 2;
-
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < shape[r].length; c++) {
-        if (shape[r][c]) {
-          drawBlock(nextCtx, offsetX + c, offsetY + r, proto.color);
+    const s = 13;
+    for (let i = 0; i < Math.min(4, nextQueue.length); i++) {
+      const proto = TETROMINOS[nextQueue[i]];
+      const ox = (nextCanvas.width - proto.shape[0].length * s) / 2 / s;
+      const oy = (i * 48 + 8) / s;
+      for (let r = 0; r < proto.shape.length; r++) {
+        for (let cl = 0; cl < proto.shape[r].length; cl++) {
+          if (proto.shape[r][cl]) drawBlock(nextCtx, ox + cl, oy + r, proto.color, false, s);
         }
       }
     }
+  }
+
+  function showPopup(text) {
+    popupEl.textContent = text;
+    popupEl.classList.remove('pop');
+    void popupEl.offsetWidth; // リフロー
+    popupEl.classList.add('pop');
+    setTimeout(() => popupEl.classList.remove('pop'), 800);
   }
 
   function updateStats() {
     scoreEl.textContent = score;
     levelEl.textContent = level;
     linesEl.textContent = lines;
-  }
-
-  function saveHistory() {
-    const state = {
-      board: board.map(row => [...row]),
-      currentPiece: currentPiece ? {
-        type: currentPiece.type,
-        shape: currentPiece.shape.map(row => [...row]),
-        color: currentPiece.color,
-        x: currentPiece.x,
-        y: currentPiece.y
-      } : null,
-      nextPieceType,
-      bag: [...bag],
-      score,
-      level,
-      lines
-    };
-    history.push(state);
-    if (history.length > 50) history.shift();
-  }
-
-  function undo() {
-    if (history.length === 0 || isGameOver) {
-      statusEl.textContent = 'これ以上戻れません';
-      return;
-    }
-    const state = history.pop();
-    board = state.board.map(row => [...row]);
-    currentPiece = state.currentPiece ? {
-      type: state.currentPiece.type,
-      shape: state.currentPiece.shape.map(row => [...row]),
-      color: state.currentPiece.color,
-      x: state.currentPiece.x,
-      y: state.currentPiece.y
-    } : null;
-    nextPieceType = state.nextPieceType;
-    bag = [...state.bag];
-    score = state.score;
-    level = state.level;
-    lines = state.lines;
-
-    updateStats();
-    drawNext();
-    statusEl.textContent = '1手戻りました';
+    comboEl.textContent = combo > 0 ? `${combo} COMBO` : '-';
+    b2bBadge.classList.toggle('show', b2b);
   }
 
   function showOverlay(title) {
@@ -705,111 +841,153 @@
     overlay.classList.remove('active');
   }
 
-  function togglePause() {
-    if (isGameOver) return;
-    isPaused = !isPaused;
-    if (isPaused) {
-      showOverlay('PAUSED');
-      statusEl.textContent = '一時停止中';
-    } else {
-      hideOverlay();
-      statusEl.textContent = '再開';
-    }
-  }
-
   function restart() {
     initBoard();
     bag = [];
-    history = [];
+    nextQueue = [];
+    holdType = null;
     score = 0;
     level = 1;
     lines = 0;
+    combo = -1;
+    b2b = false;
     dropInterval = 1000;
     isGameOver = false;
     isPaused = false;
-    nextPieceType = null;
     hideOverlay();
     updateStats();
     spawnPiece();
-    statusEl.textContent = 'START!';
   }
 
   // ゲームループ
-  function gameLoop(time = 0) {
+  function gameLoop(now = 0) {
     if (!isGameOver && !isPaused) {
-      if (time - lastDropTime > dropInterval) {
+      // 自動落下
+      if (now - lastDropTime > dropInterval) {
         if (!move(0, 1)) {
-          lockPiece();
+          if (lockTimer === 0) lockTimer = now;
+        } else {
+          lockTimer = 0;
         }
-        lastDropTime = time;
+        lastDropTime = now;
+      }
+
+      // ロックディレイ判定
+      if (isGrounded()) {
+        if (lockTimer === 0) lockTimer = now;
+        else if (now - lockTimer >= LOCK_DELAY) {
+          lockPiece();
+          lockTimer = 0;
+        }
+      } else {
+        lockTimer = 0;
       }
     }
+
     draw();
     requestAnimationFrame(gameLoop);
   }
 
-  // ボタン押下エフェクトの付与
-  function triggerButtonEffect(btnId) {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-      btn.classList.add('key-pressed');
-      setTimeout(() => btn.classList.remove('key-pressed'), 120);
+  // ボタン視覚エフェクト
+  function triggerBtn(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.add('btn-active');
+      setTimeout(() => el.classList.remove('btn-active'), 110);
     }
+  }
+
+  // DAS / ARR キー長押しリピート
+  const keys = {};
+  const DAS = 140; // 初回タメ (ms)
+  const ARR = 32;  // 連射間隔 (ms)
+  let dasTimer = null;
+  let arrInterval = null;
+
+  function handleAutoRepeat(key, action, btnId) {
+    action();
+    triggerBtn(btnId);
+    clearTimeout(dasTimer);
+    clearInterval(arrInterval);
+
+    dasTimer = setTimeout(() => {
+      arrInterval = setInterval(() => {
+        if (keys[key]) {
+          action();
+          triggerBtn(btnId);
+        } else {
+          clearInterval(arrInterval);
+        }
+      }, ARR);
+    }, DAS);
   }
 
   function setupInputs() {
     // 画面ボタン
-    document.getElementById('btn-up').onclick = () => { tryRotate(); triggerButtonEffect('btn-up'); };
-    document.getElementById('btn-left').onclick = () => { move(-1, 0); triggerButtonEffect('btn-left'); };
-    document.getElementById('btn-right').onclick = () => { move(1, 0); triggerButtonEffect('btn-right'); };
-    document.getElementById('btn-down').onclick = () => { softDrop(); triggerButtonEffect('btn-down'); };
-    document.getElementById('btn-drop').onclick = () => { hardDrop(); triggerButtonEffect('btn-drop'); };
+    document.getElementById('v-rot-r').onclick = () => { tryRotate(1); triggerBtn('v-rot-r'); };
+    document.getElementById('v-rot-l').onclick = () => { tryRotate(-1); triggerBtn('v-rot-l'); };
+    document.getElementById('v-left').onclick  = () => { move(-1, 0); triggerBtn('v-left'); };
+    document.getElementById('v-right').onclick = () => { move(1, 0); triggerBtn('v-right'); };
+    document.getElementById('v-down').onclick  = () => { softDrop(); triggerBtn('v-down'); };
+    document.getElementById('v-drop').onclick  = () => { hardDrop(); triggerBtn('v-drop'); };
+    document.getElementById('v-hold').onclick  = () => { hold(); triggerBtn('v-hold'); };
 
-    document.getElementById('btn-pause').onclick = togglePause;
-    document.getElementById('btn-undo').onclick = undo;
+    document.getElementById('btn-pause').onclick = () => {
+      isPaused = !isPaused;
+      if (isPaused) showOverlay('PAUSED');
+      else hideOverlay();
+    };
     document.getElementById('btn-restart').onclick = restart;
-    retryBtn.onclick = restart;
+    document.getElementById('btn-retry').onclick = restart;
 
-    // キーボード連動（↑キー＝回転）
+    // キーボード操作
     window.addEventListener('keydown', (e) => {
-      if (e.repeat && ['ArrowUp', ' ', 'KeyZ', 'KeyP'].includes(e.code)) return;
+      if (keys[e.code]) return;
+      keys[e.code] = true;
 
       switch(e.code) {
-        case 'ArrowUp':
-        case 'KeyX':
-          tryRotate();
-          triggerButtonEffect('btn-up');
-          e.preventDefault();
-          break;
         case 'ArrowLeft':
         case 'KeyA':
-          move(-1, 0);
-          triggerButtonEffect('btn-left');
+          handleAutoRepeat(e.code, () => move(-1, 0), 'v-left');
           e.preventDefault();
           break;
         case 'ArrowRight':
         case 'KeyD':
-          move(1, 0);
-          triggerButtonEffect('btn-right');
+          handleAutoRepeat(e.code, () => move(1, 0), 'v-right');
           e.preventDefault();
           break;
         case 'ArrowDown':
         case 'KeyS':
-          softDrop();
-          triggerButtonEffect('btn-down');
+          handleAutoRepeat(e.code, () => softDrop(), 'v-down');
+          e.preventDefault();
+          break;
+        case 'ArrowUp':
+        case 'KeyX':
+          tryRotate(1);
+          triggerBtn('v-rot-r');
+          e.preventDefault();
+          break;
+        case 'KeyZ':
+          tryRotate(-1);
+          triggerBtn('v-rot-l');
           e.preventDefault();
           break;
         case 'Space':
           hardDrop();
-          triggerButtonEffect('btn-drop');
+          triggerBtn('v-drop');
           e.preventDefault();
           break;
-        case 'KeyZ':
-          undo();
+        case 'KeyC':
+        case 'ShiftLeft':
+        case 'ShiftRight':
+          hold();
+          triggerBtn('v-hold');
           e.preventDefault();
           break;
         case 'KeyP':
-          togglePause();
+          isPaused = !isPaused;
+          if (isPaused) showOverlay('PAUSED');
+          else hideOverlay();
           e.preventDefault();
           break;
         case 'KeyR':
@@ -818,9 +996,17 @@
           break;
       }
     });
+
+    window.addEventListener('keyup', (e) => {
+      keys[e.code] = false;
+      if (['ArrowLeft', 'KeyA', 'ArrowRight', 'KeyD', 'ArrowDown', 'KeyS'].includes(e.code)) {
+        clearTimeout(dasTimer);
+        clearInterval(arrInterval);
+      }
+    });
   }
 
-  // 初期化起動
+  // 起動
   initBoard();
   setupInputs();
   restart();
