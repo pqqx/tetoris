@@ -2,282 +2,446 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>BY GPT Tetoris</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>By Gemini Tetris</title>
 <style>
-  body {
-    font-family: monospace;
-    background: #111;
-    color: #eee;
-    margin: 0;
-    height: 100vh;
-    overflow: hidden;
-    position: relative;
-    user-select: none;
+  :root {
+    --bg-color: #0b0e14;
+    --panel-bg: rgba(20, 26, 38, 0.85);
+    --panel-border: #1f2a3d;
+    --accent-cyan: #00f0f0;
+    --accent-glow: rgba(0, 240, 240, 0.35);
+    --text-color: #e2e8f0;
+    --text-dim: #718096;
+    --grid-border: rgba(255, 255, 255, 0.04);
   }
-  #game {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 200px;
-    height: 400px;
-    background: #222;
-    border: 3px solid #555;
-  }
-  .cell {
-    width: 20px;
-    height: 20px;
+
+  * {
     box-sizing: border-box;
-    border: 1px solid #333;
-    float: left;
-  }
-  #controller {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    display: grid;
-    grid-template-columns: 60px 60px 60px;
-    grid-template-rows: 40px 40px;
-    gap: 10px;
-    justify-content: center;
-  }
-  #upBtn {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  #leftBtn {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  #downBtn {
-    grid-column: 2;
-    grid-row: 2;
-  }
-  #rightBtn {
-    grid-column: 3;
-    grid-row: 2;
-  }
-  button {
-    padding: 0;
-    font-size: 18px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: none;
-    background: #444;
-    color: #eee;
-    cursor: pointer;
     user-select: none;
-    transition: background 0.2s;
+    -webkit-user-select: none;
   }
-  button:hover {
-    background: #666;
+
+  body {
+    margin: 0;
+    padding: 10px;
+    background-color: var(--bg-color);
+    background-image: 
+      radial-gradient(circle at 50% 20%, rgba(0, 240, 240, 0.08) 0%, transparent 60%),
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 20px 20px, 20px 20px;
+    color: var(--text-color);
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, "Yu Gothic", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
   }
-  #undoReset {
-    position: absolute;
-    bottom: 90px;
-    left: 20px;
+
+  .game-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
+    max-width: 600px;
+    width: 100%;
   }
-  #undoReset button {
-    width: 130px;
-    height: 36px;
-    border-radius: 8px;
-    font-size: 14px;
+
+  header {
+    text-align: center;
   }
-  #saveLoad {
-    position: absolute;
-    bottom: 20px;
-    left: 220px;
+
+  h1 {
+    margin: 0;
+    font-size: 26px;
+    letter-spacing: 4px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 0 10px var(--accent-cyan), 0 0 20px var(--accent-cyan);
+  }
+
+  .main-stage {
     display: flex;
-    gap: 10px;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    align-items: flex-start;
   }
-  #saveLoad button {
-    width: 80px;
-    height: 36px;
+
+  /* サイドパネル */
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 110px;
+  }
+
+  .panel-box {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
+    padding: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    text-align: center;
   }
-  #status {
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent-cyan);
+    font-family: monospace;
+  }
+
+  #next-canvas {
+    display: block;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+  }
+
+  /* ゲーム盤面 */
+  .board-container {
+    position: relative;
+    background: rgba(5, 7, 12, 0.9);
+    border: 2px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 4px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.8), 0 0 15px var(--accent-glow);
+  }
+
+  #game-canvas {
+    display: block;
+    background: #0d1117;
+    border-radius: 6px;
+  }
+
+  /* オーバーレイ (GAME OVER / PAUSE) */
+  .overlay {
     position: absolute;
-    top: 430px;
-    left: 20px;
-    min-height: 20px;
+    inset: 4px;
+    background: rgba(5, 8, 15, 0.85);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    border-radius: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .overlay-title {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #ff3366;
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
+  }
+
+  /* 操作ガイド */
+  .guide-box {
+    display: none;
+  }
+  @media (min-width: 600px) {
+    .side-panel.right-panel {
+      width: 130px;
+    }
+    .guide-box {
+      display: block;
+      font-size: 11px;
+      line-height: 1.6;
+      text-align: left;
+    }
+    kbd {
+      background: #2d3748;
+      border-radius: 3px;
+      padding: 1px 4px;
+      font-family: monospace;
+      border: 1px solid #4a5568;
+      color: #fff;
+    }
+  }
+
+  /* ボタン全般 */
+  .btn {
+    background: #1e2638;
+    color: var(--text-color);
+    border: 1px solid #334155;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.08s ease;
+    outline: none;
+  }
+
+  .btn:hover {
+    background: #2a364f;
+    border-color: #475569;
+  }
+
+  .btn:active, .btn.key-pressed {
+    transform: scale(0.92);
+    background: var(--accent-cyan) !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px var(--accent-cyan);
+  }
+
+  .action-btn {
+    width: 100%;
+    padding: 7px 0;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  /* コントローラー (モバイル ＆ キーボード連動) */
+  .controls-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 380px;
+    padding: 6px 12px;
+    gap: 15px;
+  }
+
+  .dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 46px);
+    grid-template-rows: repeat(2, 46px);
+    gap: 6px;
+  }
+
+  .dpad .pad-btn {
+    width: 46px;
+    height: 46px;
+    font-size: 18px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #btn-up { grid-column: 2; grid-row: 1; }
+  #btn-left { grid-column: 1; grid-row: 2; }
+  #btn-down { grid-column: 2; grid-row: 2; }
+  #btn-right { grid-column: 3; grid-row: 2; }
+
+  .action-pad {
+    display: flex;
+    gap: 8px;
+  }
+
+  .drop-btn {
+    width: 75px;
+    height: 98px;
     font-size: 14px;
+    border-radius: 12px;
+    background: #251b38;
+    border-color: #553c7b;
+    color: #d8b4fe;
+  }
+
+  .drop-btn:active, .drop-btn.key-pressed {
+    background: #a855f7 !important;
+    box-shadow: 0 0 15px #a855f7;
+  }
+
+  #status-bar {
+    font-size: 12px;
+    color: var(--text-dim);
+    min-height: 16px;
+    text-align: center;
   }
 </style>
 </head>
 <body>
 
-<h1 style="position:absolute; top:0; left:20px; margin:0; font-size:20px;">Tetoris Mini</h1>
-<div id="game"></div>
+<div class="game-wrapper">
+  <header>
+    <h1>TETRIS</h1>
+  </header>
 
-<div id="controller">
-  <button id="upBtn">↑</button>
-  <button id="leftBtn">←</button>
-  <button id="downBtn">↓</button>
-  <button id="rightBtn">→</button>
+  <div class="main-stage">
+    <!-- 左パネル: STATS & NEXT -->
+    <div class="side-panel">
+      <div class="panel-box">
+        <div class="panel-title">NEXT</div>
+        <canvas id="next-canvas" width="80" height="80"></canvas>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">SCORE</div>
+        <div id="score" class="stat-value">0</div>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">LEVEL</div>
+        <div id="level" class="stat-value">1</div>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">LINES</div>
+        <div id="lines" class="stat-value">0</div>
+      </div>
+    </div>
+
+    <!-- メイン盤面 -->
+    <div class="board-container">
+      <canvas id="game-canvas" width="200" height="400"></canvas>
+      
+      <!-- オーバーレイ (GAME OVER / PAUSE) -->
+      <div id="overlay" class="overlay">
+        <div id="overlay-title" class="overlay-title">GAME OVER</div>
+        <button id="retry-btn" class="btn" style="padding: 8px 20px; font-size: 14px;">RETRY</button>
+      </div>
+    </div>
+
+    <!-- 右パネル: システム操作 ＆ ガイド -->
+    <div class="side-panel right-panel">
+      <div class="panel-box">
+        <div class="panel-title">MENU</div>
+        <button id="btn-pause" class="btn action-btn">ポーズ (P)</button>
+        <button id="btn-undo" class="btn action-btn" style="color:#67e8f9;">1手戻る (Z)</button>
+        <button id="btn-restart" class="btn action-btn" style="color:#fda4af;">リセット (R)</button>
+      </div>
+
+      <div class="panel-box guide-box">
+        <div class="panel-title">KEY GUIDE</div>
+        <kbd>←</kbd> <kbd>→</kbd> : 移動<br>
+        <kbd>↑</kbd> <kbd>X</kbd> : 回転<br>
+        <kbd>↓</kbd> : 高速落下<br>
+        <kbd>Space</kbd> : 瞬時落下<br>
+        <kbd>Z</kbd> : 1手戻る<br>
+        <kbd>P</kbd> : 一時停止
+      </div>
+    </div>
+  </div>
+
+  <div id="status-bar">READY</div>
+
+  <!-- コントローラー（キーボード押下時に光る連動UI） -->
+  <div class="controls-wrapper">
+    <div class="dpad">
+      <button id="btn-up" class="btn pad-btn" title="回転">↻</button>
+      <button id="btn-left" class="btn pad-btn">←</button>
+      <button id="btn-down" class="btn pad-btn">↓</button>
+      <button id="btn-right" class="btn pad-btn">→</button>
+    </div>
+    <div class="action-pad">
+      <button id="btn-drop" class="btn drop-btn">HARD<br>DROP</button>
+    </div>
+  </div>
 </div>
-
-<div id="undoReset">
-  <button id="undoBtn">一手戻る</button>
-  <button id="resetUndoBtn">すべて戻る</button>
-</div>
-
-<div id="saveLoad">
-  <button id="saveBtn">Save</button>
-  <button id="loadBtn">Load</button>
-</div>
-
-<div id="status"></div>
 
 <script>
 (() => {
   const COLS = 10;
   const ROWS = 20;
+  const BLOCK_SIZE = 20;
 
-  const gameEl = document.getElementById('game');
-  const statusEl = document.getElementById('status');
+  const canvas = document.getElementById('game-canvas');
+  const ctx = canvas.getContext('2d');
+  const nextCanvas = document.getElementById('next-canvas');
+  const nextCtx = nextCanvas.getContext('2d');
 
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const linesEl = document.getElementById('lines');
+  const statusEl = document.getElementById('status-bar');
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlay-title');
+  const retryBtn = document.getElementById('retry-btn');
+
+  // テトリス標準カラー＆シェイプ
   const TETROMINOS = [
-    {
-      shape: [
-        [0,0,0,0],
-        [1,1,1,1],
-        [0,0,0,0],
-        [0,0,0,0]
-      ],
-      color: '#00f0f0'
-    },
-    {
-      shape: [
-        [1,0,0],
-        [1,1,1],
-        [0,0,0]
-      ],
-      color: '#0000f0'
-    },
-    {
-      shape: [
-        [0,0,1],
-        [1,1,1],
-        [0,0,0]
-      ],
-      color: '#f0a000'
-    },
-    {
-      shape: [
-        [1,1],
-        [1,1]
-      ],
-      color: '#f0f000'
-    },
-    {
-      shape: [
-        [0,1,1],
-        [1,1,0],
-        [0,0,0]
-      ],
-      color: '#00f000'
-    },
-    {
-      shape: [
-        [0,1,0],
-        [1,1,1],
-        [0,0,0]
-      ],
-      color: '#a000f0'
-    },
-    {
-      shape: [
-        [1,1,0],
-        [0,1,1],
-        [0,0,0]
-      ],
-      color: '#f00000'
-    }
+    { name: 'I', shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], color: '#00f0f0' },
+    { name: 'J', shape: [[1,0,0],[1,1,1],[0,0,0]], color: '#0055ff' },
+    { name: 'L', shape: [[0,0,1],[1,1,1],[0,0,0]], color: '#ffaa00' },
+    { name: 'O', shape: [[1,1],[1,1]], color: '#f0f000' },
+    { name: 'S', shape: [[0,1,1],[1,1,0],[0,0,0]], color: '#00f000' },
+    { name: 'T', shape: [[0,1,0],[1,1,1],[0,0,0]], color: '#aa00f0' },
+    { name: 'Z', shape: [[1,1,0],[0,1,1],[0,0,0]], color: '#f00000' }
   ];
 
-  let bag = [];
-  function createBag() {
-    bag = [0,1,2,3,4,5,6];
-    for(let i=bag.length-1; i>0; i--) {
-      const j = Math.floor(Math.random() * (i+1));
-      [bag[i], bag[j]] = [bag[j], bag[i]];
-    }
-  }
-
   let board = [];
-  for(let r=0; r<ROWS; r++) {
-    board[r] = Array(COLS).fill(null);
-  }
-
+  let bag = [];
   let currentPiece = null;
+  let nextPieceType = null;
+  let score = 0;
+  let level = 1;
+  let lines = 0;
+  let isGameOver = false;
+  let isPaused = false;
   let history = [];
 
-  function createBoardHtml() {
-    gameEl.innerHTML = '';
-    for(let r=0; r<ROWS; r++) {
-      for(let c=0; c<COLS; c++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.dataset.r = r;
-        cell.dataset.c = c;
-        gameEl.appendChild(cell);
-      }
-    }
+  // タイマー管理
+  let lastDropTime = 0;
+  let dropInterval = 1000;
+
+  function initBoard() {
+    board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
   }
 
-  function draw() {
-    for(let r=0; r<ROWS; r++) {
-      for(let c=0; c<COLS; c++) {
-        const idx = r*COLS + c;
-        const cell = gameEl.children[idx];
-        cell.style.background = board[r][c] || '#222';
+  function getFromBag() {
+    if (bag.length === 0) {
+      bag = [0, 1, 2, 3, 4, 5, 6];
+      for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [bag[i], bag[j]] = [bag[j], bag[i]];
       }
     }
-    if(currentPiece) {
-      const {shape, x, y, color} = currentPiece;
-      for(let r=0; r<shape.length; r++) {
-        for(let c=0; c<shape[r].length; c++) {
-          if(shape[r][c]) {
-            const boardR = y + r;
-            const boardC = x + c;
-            if(boardR>=0 && boardR<ROWS && boardC>=0 && boardC<COLS) {
-              const idx = boardR*COLS + boardC;
-              const cell = gameEl.children[idx];
-              cell.style.background = color;
-            }
-          }
-        }
-      }
-    }
+    return bag.pop();
   }
 
   function spawnPiece() {
-    if(bag.length===0) createBag();
-    const type = bag.pop();
-    const {shape, color} = TETROMINOS[type];
+    if (nextPieceType === null) {
+      nextPieceType = getFromBag();
+    }
+    const type = nextPieceType;
+    nextPieceType = getFromBag();
+
+    const proto = TETROMINOS[type];
     currentPiece = {
-      type,
-      shape,
-      color,
-      x: Math.floor((COLS - shape[0].length)/2),
+      type: type,
+      shape: proto.shape.map(row => [...row]),
+      color: proto.color,
+      x: Math.floor((COLS - proto.shape[0].length) / 2),
       y: 0
     };
+
+    if (isCollide(currentPiece.x, currentPiece.y, currentPiece.shape)) {
+      isGameOver = true;
+      showOverlay('GAME OVER');
+    }
+    drawNext();
   }
 
   function isCollide(x, y, shape) {
-    for(let r=0; r<shape.length; r++) {
-      for(let c=0; c<shape[r].length; c++) {
-        if(shape[r][c]) {
-          const boardR = y + r;
-          const boardC = x + c;
-          if(boardC<0 || boardC>=COLS || boardR>=ROWS) return true;
-          if(boardR>=0 && board[boardR][boardC]) return true;
+    for (let r = 0; r < shape.length; r++) {
+      for (let c = 0; c < shape[r].length; c++) {
+        if (shape[r][c]) {
+          const br = y + r;
+          const bc = x + c;
+          if (bc < 0 || bc >= COLS || br >= ROWS) return true;
+          if (br >= 0 && board[br][bc]) return true;
         }
       }
     }
@@ -287,235 +451,381 @@
   function rotate(shape) {
     const H = shape.length;
     const W = shape[0].length;
-    let newShape = [];
-    for(let c=0; c<W; c++) {
-      let newRow = [];
-      for(let r=H-1; r>=0; r--) {
-        newRow.push(shape[r][c]);
+    let res = [];
+    for (let c = 0; c < W; c++) {
+      let row = [];
+      for (let r = H - 1; r >= 0; r--) {
+        row.push(shape[r][c]);
       }
-      newShape.push(newRow);
+      res.push(row);
     }
-    return newShape;
+    return res;
   }
 
-  function fixPiece() {
-    const {shape, x, y, color} = currentPiece;
-    for(let r=0; r<shape.length; r++) {
-      for(let c=0; c<shape[r].length; c++) {
-        if(shape[r][c]) {
-          const boardR = y + r;
-          const boardC = x + c;
-          if(boardR>=0 && boardR<ROWS && boardC>=0 && boardC<COLS) {
-            board[boardR][boardC] = color;
+  // 簡易壁蹴り（Wall Kick）付き回転
+  function tryRotate() {
+    if (!currentPiece || isGameOver || isPaused) return false;
+    const newShape = rotate(currentPiece.shape);
+    const kicks = [0, -1, 1, -2, 2]; // 左右への位置補正
+    for (let dx of kicks) {
+      if (!isCollide(currentPiece.x + dx, currentPiece.y, newShape)) {
+        saveHistory();
+        currentPiece.x += dx;
+        currentPiece.shape = newShape;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function move(dx, dy) {
+    if (!currentPiece || isGameOver || isPaused) return false;
+    if (!isCollide(currentPiece.x + dx, currentPiece.y + dy, currentPiece.shape)) {
+      if (dx !== 0) saveHistory();
+      currentPiece.x += dx;
+      currentPiece.y += dy;
+      return true;
+    }
+    return false;
+  }
+
+  function lockPiece() {
+    saveHistory();
+    const { shape, x, y, color } = currentPiece;
+    for (let r = 0; r < shape.length; r++) {
+      for (let c = 0; c < shape[r].length; c++) {
+        if (shape[r][c]) {
+          const br = y + r;
+          const bc = x + c;
+          if (br >= 0 && br < ROWS && bc >= 0 && bc < COLS) {
+            board[br][bc] = color;
           }
         }
       }
     }
-    currentPiece = null;
+    clearLines();
+    spawnPiece();
   }
 
   function clearLines() {
-    let newBoard = [];
     let linesCleared = 0;
-    for(let r=0; r<ROWS; r++) {
-      if(board[r].every(cell => cell !== null)) {
+    for (let r = ROWS - 1; r >= 0; r--) {
+      if (board[r].every(cell => cell !== null)) {
+        board.splice(r, 1);
+        board.unshift(Array(COLS).fill(null));
         linesCleared++;
-      } else {
-        newBoard.push(board[r]);
+        r++; // 再検査
       }
     }
-    for(let i=0; i<linesCleared; i++) {
-      newBoard.unshift(Array(COLS).fill(null));
-    }
-    board = newBoard;
-  }
-
-  function move(dx, dy) {
-    if(!currentPiece) return false;
-    const nx = currentPiece.x + dx;
-    const ny = currentPiece.y + dy;
-    if(!isCollide(nx, ny, currentPiece.shape)) {
-      saveHistory();
-      currentPiece.x = nx;
-      currentPiece.y = ny;
-      return true;
-    }
-    return false;
-  }
-
-  function rotateCurrent() {
-    if(!currentPiece) return false;
-    const newShape = rotate(currentPiece.shape);
-    if(!isCollide(currentPiece.x, currentPiece.y, newShape)) {
-      saveHistory();
-      currentPiece.shape = newShape;
-      return true;
-    }
-    return false;
-  }
-
-  function drop() {
-    if(!currentPiece) return;
-    if(!move(0,1)) {
-      fixPiece();
-      clearLines();
-      spawnPiece();
-      saveHistory(true);
+    if (linesCleared > 0) {
+      const scoreTable = [0, 100, 300, 500, 800];
+      score += (scoreTable[linesCleared] || 1000) * level;
+      lines += linesCleared;
+      level = Math.floor(lines / 10) + 1;
+      dropInterval = Math.max(100, 1000 - (level - 1) * 80);
+      updateStats();
+      statusEl.textContent = `${linesCleared} LINE CLEAR!`;
     }
   }
 
-  function saveHistory(reset=false) {
-    if(reset) {
-      history = [];
+  function hardDrop() {
+    if (!currentPiece || isGameOver || isPaused) return;
+    saveHistory();
+    let dropDist = 0;
+    while (!isCollide(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+      currentPiece.y++;
+      dropDist++;
     }
-    const boardCopy = board.map(row => row.slice());
-    const pieceCopy = currentPiece ? {
-      type: currentPiece.type,
-      shape: currentPiece.shape.map(r => r.slice()),
-      color: currentPiece.color,
-      x: currentPiece.x,
-      y: currentPiece.y
-    } : null;
-    history.push({
-      board: boardCopy,
-      currentPiece: pieceCopy,
-      bag: bag.slice()
-    });
-    if(history.length > 100) history.shift();
+    score += dropDist * 2;
+    updateStats();
+    lockPiece();
+  }
+
+  function softDrop() {
+    if (move(0, 1)) {
+      score += 1;
+      updateStats();
+    } else {
+      lockPiece();
+    }
+  }
+
+  // ゴーストブロックのY座標計算
+  function getGhostY() {
+    if (!currentPiece) return 0;
+    let gy = currentPiece.y;
+    while (!isCollide(currentPiece.x, gy + 1, currentPiece.shape)) {
+      gy++;
+    }
+    return gy;
+  }
+
+  function drawBlock(targetCtx, x, y, color, isGhost = false) {
+    const px = x * BLOCK_SIZE;
+    const py = y * BLOCK_SIZE;
+
+    if (isGhost) {
+      targetCtx.strokeStyle = color;
+      targetCtx.lineWidth = 1.5;
+      targetCtx.strokeRect(px + 1.5, py + 1.5, BLOCK_SIZE - 3, BLOCK_SIZE - 3);
+      return;
+    }
+
+    targetCtx.fillStyle = color;
+    targetCtx.fillRect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+
+    // 立体感のハイライト
+    targetCtx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    targetCtx.fillRect(px + 1, py + 1, BLOCK_SIZE - 2, 3);
+    targetCtx.fillRect(px + 1, py + 1, 3, BLOCK_SIZE - 2);
+
+    targetCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    targetCtx.fillRect(px + 1, py + BLOCK_SIZE - 4, BLOCK_SIZE - 2, 3);
+    targetCtx.fillRect(px + BLOCK_SIZE - 4, py + 1, 3, BLOCK_SIZE - 2);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // グリッド線
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        ctx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+      }
+    }
+
+    // 固定ブロック
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (board[r][c]) {
+          drawBlock(ctx, c, r, board[r][c]);
+        }
+      }
+    }
+
+    if (currentPiece) {
+      // ゴーストブロック描画
+      const ghostY = getGhostY();
+      const { shape, x, y, color } = currentPiece;
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
+          if (shape[r][c]) {
+            drawBlock(ctx, x + c, ghostY + r, color, true);
+          }
+        }
+      }
+
+      // 操作中ブロック描画
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
+          if (shape[r][c]) {
+            drawBlock(ctx, x + c, y + r, color);
+          }
+        }
+      }
+    }
+  }
+
+  function drawNext() {
+    nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+    if (nextPieceType === null) return;
+    const proto = TETROMINOS[nextPieceType];
+    const shape = proto.shape;
+    const size = shape.length;
+    const offsetX = (4 - shape[0].length) / 2;
+    const offsetY = (4 - size) / 2;
+
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < shape[r].length; c++) {
+        if (shape[r][c]) {
+          drawBlock(nextCtx, offsetX + c, offsetY + r, proto.color);
+        }
+      }
+    }
+  }
+
+  function updateStats() {
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    linesEl.textContent = lines;
+  }
+
+  function saveHistory() {
+    const state = {
+      board: board.map(row => [...row]),
+      currentPiece: currentPiece ? {
+        type: currentPiece.type,
+        shape: currentPiece.shape.map(row => [...row]),
+        color: currentPiece.color,
+        x: currentPiece.x,
+        y: currentPiece.y
+      } : null,
+      nextPieceType,
+      bag: [...bag],
+      score,
+      level,
+      lines
+    };
+    history.push(state);
+    if (history.length > 50) history.shift();
   }
 
   function undo() {
-    if(history.length<=1) {
-      statusEl.textContent = '戻れる手がありません';
+    if (history.length === 0 || isGameOver) {
+      statusEl.textContent = 'これ以上戻れません';
       return;
     }
-    history.pop();
-    const last = history[history.length-1];
-    board = last.board.map(row => row.slice());
-    currentPiece = last.currentPiece ? {
-      type: last.currentPiece.type,
-      shape: last.currentPiece.shape.map(r => r.slice()),
-      color: last.currentPiece.color,
-      x: last.currentPiece.x,
-      y: last.currentPiece.y
+    const state = history.pop();
+    board = state.board.map(row => [...row]);
+    currentPiece = state.currentPiece ? {
+      type: state.currentPiece.type,
+      shape: state.currentPiece.shape.map(row => [...row]),
+      color: state.currentPiece.color,
+      x: state.currentPiece.x,
+      y: state.currentPiece.y
     } : null;
-    bag = last.bag.slice();
-    statusEl.textContent = '一手戻りました';
-    draw();
+    nextPieceType = state.nextPieceType;
+    bag = [...state.bag];
+    score = state.score;
+    level = state.level;
+    lines = state.lines;
+
+    updateStats();
+    drawNext();
+    statusEl.textContent = '1手戻りました';
   }
 
-  function resetUndo() {
-    if(history.length === 0) return;
-    const first = history[0];
-    board = first.board.map(row => row.slice());
-    currentPiece = first.currentPiece ? {
-      type: first.currentPiece.type,
-      shape: first.currentPiece.shape.map(r => r.slice()),
-      color: first.currentPiece.color,
-      x: first.currentPiece.x,
-      y: first.currentPiece.y
-    } : null;
-    bag = first.bag.slice();
-    history = [first];
-    statusEl.textContent = 'すべて戻りました';
-    draw();
+  function showOverlay(title) {
+    overlayTitle.textContent = title;
+    overlay.classList.add('active');
   }
 
-  function saveGame() {
-    if(history.length === 0) {
-      statusEl.textContent = '保存する状態がありません';
-      return;
-    }
-    const last = history[history.length-1];
-    localStorage.setItem('tetrisSave', JSON.stringify(last));
-    statusEl.textContent = 'ゲームを保存しました';
+  function hideOverlay() {
+    overlay.classList.remove('active');
   }
 
-  function loadGame() {
-    const json = localStorage.getItem('tetrisSave');
-    if(!json) {
-      statusEl.textContent = '保存データがありません';
-      return;
-    }
-    try {
-      const data = JSON.parse(json);
-      board = data.board.map(row => row.slice());
-      currentPiece = data.currentPiece ? {
-        type: data.currentPiece.type,
-        shape: data.currentPiece.shape.map(r => r.slice()),
-        color: data.currentPiece.color,
-        x: data.currentPiece.x,
-        y: data.currentPiece.y
-      } : null;
-      bag = data.bag.slice();
-      history = [data];
-      statusEl.textContent = 'ゲームを読み込みました';
-      draw();
-    } catch(e) {
-      statusEl.textContent = '読み込みエラー';
+  function togglePause() {
+    if (isGameOver) return;
+    isPaused = !isPaused;
+    if (isPaused) {
+      showOverlay('PAUSED');
+      statusEl.textContent = '一時停止中';
+    } else {
+      hideOverlay();
+      statusEl.textContent = '再開';
     }
   }
 
-  function setupButtons() {
-    document.getElementById('upBtn').onclick = () => {
-      if(rotateCurrent()) {
-        statusEl.textContent = '回転しました';
-        draw();
-      } else {
-        statusEl.textContent = '回転できません';
-      }
-    };
-    document.getElementById('leftBtn').onclick = () => {
-      if(move(-1,0)) {
-        statusEl.textContent = '左に移動しました';
-        draw();
-      } else {
-        statusEl.textContent = '移動できません';
-      }
-    };
-    document.getElementById('downBtn').onclick = () => {
-      if(move(0,1)) {
-        statusEl.textContent = '下に移動しました';
-        draw();
-      } else {
-        statusEl.textContent = '移動できません';
-      }
-    };
-    document.getElementById('rightBtn').onclick = () => {
-      if(move(1,0)) {
-        statusEl.textContent = '右に移動しました';
-        draw();
-      } else {
-        statusEl.textContent = '移動できません';
-      }
-    };
-    document.getElementById('undoBtn').onclick = () => {
-      undo();
-    };
-    document.getElementById('resetUndoBtn').onclick = () => {
-      resetUndo();
-    };
-    document.getElementById('saveBtn').onclick = () => {
-      saveGame();
-    };
-    document.getElementById('loadBtn').onclick = () => {
-      loadGame();
-    };
-  }
-
-  function init() {
-    createBoardHtml();
-    createBag();
+  function restart() {
+    initBoard();
+    bag = [];
+    history = [];
+    score = 0;
+    level = 1;
+    lines = 0;
+    dropInterval = 1000;
+    isGameOver = false;
+    isPaused = false;
+    nextPieceType = null;
+    hideOverlay();
+    updateStats();
     spawnPiece();
-    saveHistory(true);
-    draw();
-    setupButtons();
-    statusEl.textContent = 'ゲーム開始';
+    statusEl.textContent = 'START!';
   }
 
-  init();
+  // ゲームループ
+  function gameLoop(time = 0) {
+    if (!isGameOver && !isPaused) {
+      if (time - lastDropTime > dropInterval) {
+        if (!move(0, 1)) {
+          lockPiece();
+        }
+        lastDropTime = time;
+      }
+    }
+    draw();
+    requestAnimationFrame(gameLoop);
+  }
+
+  // ボタン押下エフェクトの付与
+  function triggerButtonEffect(btnId) {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      btn.classList.add('key-pressed');
+      setTimeout(() => btn.classList.remove('key-pressed'), 120);
+    }
+  }
+
+  function setupInputs() {
+    // 画面ボタン
+    document.getElementById('btn-up').onclick = () => { tryRotate(); triggerButtonEffect('btn-up'); };
+    document.getElementById('btn-left').onclick = () => { move(-1, 0); triggerButtonEffect('btn-left'); };
+    document.getElementById('btn-right').onclick = () => { move(1, 0); triggerButtonEffect('btn-right'); };
+    document.getElementById('btn-down').onclick = () => { softDrop(); triggerButtonEffect('btn-down'); };
+    document.getElementById('btn-drop').onclick = () => { hardDrop(); triggerButtonEffect('btn-drop'); };
+
+    document.getElementById('btn-pause').onclick = togglePause;
+    document.getElementById('btn-undo').onclick = undo;
+    document.getElementById('btn-restart').onclick = restart;
+    retryBtn.onclick = restart;
+
+    // キーボード連動（↑キー＝回転）
+    window.addEventListener('keydown', (e) => {
+      if (e.repeat && ['ArrowUp', ' ', 'KeyZ', 'KeyP'].includes(e.code)) return;
+
+      switch(e.code) {
+        case 'ArrowUp':
+        case 'KeyX':
+          tryRotate();
+          triggerButtonEffect('btn-up');
+          e.preventDefault();
+          break;
+        case 'ArrowLeft':
+        case 'KeyA':
+          move(-1, 0);
+          triggerButtonEffect('btn-left');
+          e.preventDefault();
+          break;
+        case 'ArrowRight':
+        case 'KeyD':
+          move(1, 0);
+          triggerButtonEffect('btn-right');
+          e.preventDefault();
+          break;
+        case 'ArrowDown':
+        case 'KeyS':
+          softDrop();
+          triggerButtonEffect('btn-down');
+          e.preventDefault();
+          break;
+        case 'Space':
+          hardDrop();
+          triggerButtonEffect('btn-drop');
+          e.preventDefault();
+          break;
+        case 'KeyZ':
+          undo();
+          e.preventDefault();
+          break;
+        case 'KeyP':
+          togglePause();
+          e.preventDefault();
+          break;
+        case 'KeyR':
+          restart();
+          e.preventDefault();
+          break;
+      }
+    });
+  }
+
+  // 初期化起動
+  initBoard();
+  setupInputs();
+  restart();
+  requestAnimationFrame(gameLoop);
 })();
 </script>
-
 </body>
 </html>
